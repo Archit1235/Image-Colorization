@@ -14,7 +14,7 @@ RESULTS_PATH = './results'
 MODEL_PATH = './models'
 
 os.makedirs(RESULTS_PATH, exist_ok=True)
-os.makedirs(MODEL_DIR, exist_ok=True)
+os.makedirs(MODEL_PATH, exist_ok=True)
 
 def configure_gpus():
     """Configure TensorFlow to use available GPUs with memory growth."""

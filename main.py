@@ -13,7 +13,7 @@ GRAY_IMAGE_PATH = './data/gray'
 RESULTS_PATH = './results'
 MODEL_PATH = './models'
 
-os.makedirs(RESULTS_DIR, exist_ok=True)
+os.makedirs(RESULTS_PATH, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 def configure_gpus():

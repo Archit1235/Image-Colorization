@@ -4,12 +4,28 @@ from data_loader import load_and_preprocess_images
 from model import build_model
 from utils import save_image_pairs
 
+# Ensure GPUs are visible
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+print(f"Available GPUs: {len(gpus)}")
+
+# Distributed training setup
+strategy = tf.distribute.MirroredStrategy()  # Sync training across GPUs
+print(f"Number of devices: {strategy.num_replicas_in_sync}")
+
 SIZE = 160
+BATCH_SIZE = 50 * strategy.num_replicas_in_sync
+EPOCHS = 50
 DATA_PATH = './data'
 COLOR_IMAGE_PATH = f'{DATA_PATH}/color'
 GRAY_IMAGE_PATH = f'{DATA_PATH}/gray'
 RESULTS_PATH = './results'
 MODEL_PATH = './models'
+
+os.makedirs(RESULTS_DIR, exist_ok=True)
+os.makedirs(MODEL_DIR, exist_ok=True)
 
 def main():
     # Create results directory if it doesn't exist

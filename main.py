@@ -1,6 +1,7 @@
 import os
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 from data_loader import load_and_preprocess_images
 from model import build_model
 from utils import save_image_pairs
@@ -8,13 +9,15 @@ from utils import save_image_pairs
 SIZE = 160
 EPOCHS = 50
 BATCH_SIZE = 64
-COLOR_IMAGE_PATH = './data/color'
-GRAY_IMAGE_PATH = './data/gray'
-RESULTS_PATH = './results'
+LOGS_PATH = './logs'
 MODEL_PATH = './models'
+RESULTS_PATH = './results'
+GRAY_IMAGE_PATH = './data/gray'
+COLOR_IMAGE_PATH = './data/color'
 
-os.makedirs(RESULTS_PATH, exist_ok=True)
+os.makedirs(LOGS_PATH, exist_ok=True)
 os.makedirs(MODEL_PATH, exist_ok=True)
+os.makedirs(RESULTS_PATH, exist_ok=True)
 
 def configure_gpus():
     """Configure TensorFlow to use available GPUs with memory growth."""
@@ -27,6 +30,33 @@ def configure_gpus():
         except RuntimeError as e:
             print(f"Error configuring GPUs: {e}")
 
+def plot_metrics(history):
+    """Plot training and validation accuracy and loss."""
+    epochs = range(1, len(history.history['loss']) + 1)
+
+    # Loss
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, history.history['loss'], 'r', label='Training Loss')
+    plt.plot(epochs, history.history['val_loss'], 'b', label='Validation Loss')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+
+    # Accuracy
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs, history.history['accuracy'], 'r', label='Training Accuracy')
+    plt.plot(epochs, history.history['val_accuracy'], 'b', label='Validation Accuracy')
+    plt.title('Training and Validation Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(RESULTS_PATH, 'training_metrics.png'))
+    plt.show()
+
 def main():
     configure_gpus()
 
@@ -36,12 +66,12 @@ def main():
 
     # Load Data
     print("Loading images...")
-    color_images = load_and_preprocess_images(COLOR_IMAGE_PATH, SIZE, color=True)
-    gray_images = load_and_preprocess_images(GRAY_IMAGE_PATH, SIZE, color=False)
+    color_images = load_and_preprocess_images(COLOR_IMAGE_PATH, SIZE, stop_filename='6000.jpg', color=True)
+    gray_images = load_and_preprocess_images(GRAY_IMAGE_PATH, SIZE, stop_filename='6000.jpg', color=False)
 
     # Split Data
-    train_gray, train_color = gray_images[:6000], color_images[:6000]
-    test_gray, test_color = gray_images[6000:], color_images[6000:]
+    train_gray, train_color = gray_images[:5500], color_images[:5500]
+    test_gray, test_color = gray_images[5500:], color_images[5500:]
 
     # Reshape
     train_gray = np.reshape(train_gray, (len(train_gray), SIZE, SIZE, 3))
@@ -58,20 +88,28 @@ def main():
         model.compile(optimizer='adam', loss='mean_absolute_error', metrics=['accuracy'])
         model.summary()
 
+    # Callbacks for TensorBoard
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=LOGS_PATH, histogram_freq=1)
+
     # Train Model
-    model.fit(
-        train_gray, train_color, 
-        validation_data=(test_gray, test_color), 
-        epochs=EPOCHS, 
-        batch_size=BATCH_SIZE
+    history = model.fit(
+        train_gray, train_color,
+        validation_data=(test_gray, test_color),
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        callbacks=[tensorboard_callback]
     )
 
     # Evaluate Model
-    model.evaluate(test_gray, test_color)
+    evaluation = model.evaluate(test_gray, test_color)
+    print(f"Test Loss: {evaluation[0]}, Test Accuracy: {evaluation[1]}")
 
     # Save Model
     model.save(f'{MODEL_PATH}/model.keras')
     model.save_weights(f'{MODEL_PATH}/model.weights.h5')
+
+    # Save Training Metrics
+    plot_metrics(history)
 
     # Prediction and Saving Images
     for i in range(0, 1129):

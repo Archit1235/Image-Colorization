@@ -34,17 +34,14 @@ def main():
     strategy = tf.distribute.MirroredStrategy()
     print(f"Number of devices: {strategy.num_replicas_in_sync}")
 
-    # Create results directory if it doesn't exist
-    os.makedirs(RESULTS_PATH, exist_ok=True)
-
     # Load Data
     print("Loading images...")
-    color_images = load_and_preprocess_images(COLOR_IMAGE_PATH, SIZE, stop_filename='6000.jpg', color=True)
-    gray_images = load_and_preprocess_images(GRAY_IMAGE_PATH, SIZE, stop_filename='6000.jpg', color=False)
+    color_images = load_and_preprocess_images(COLOR_IMAGE_PATH, SIZE, color=True)
+    gray_images = load_and_preprocess_images(GRAY_IMAGE_PATH, SIZE, color=False)
 
     # Split Data
-    train_gray, train_color = gray_images[:5500], color_images[:5500]
-    test_gray, test_color = gray_images[5500:], color_images[5500:]
+    train_gray, train_color = gray_images[:6000], color_images[:6000]
+    test_gray, test_color = gray_images[6000:], color_images[6000:]
 
     # Reshape
     train_gray = np.reshape(train_gray, (len(train_gray), SIZE, SIZE, 3))
@@ -77,7 +74,7 @@ def main():
     model.save_weights(f'{MODEL_PATH}/model.weights.h5')
 
     # Prediction and Saving Images
-    for i in range(50, 58):
+    for i in range(1000, 1050):
         predicted = np.clip(model.predict(test_gray[i].reshape(1, SIZE, SIZE, 3)), 0.0, 1.0).reshape(SIZE, SIZE, 3)
         save_image_pairs(test_color[i], test_gray[i], predicted, os.path.join(RESULTS_PATH, f'result_{i}.png'))
 

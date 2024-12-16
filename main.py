@@ -74,7 +74,7 @@ def main():
     model.save_weights(f'{MODEL_PATH}/model.weights.h5')
 
     # Prediction and Saving Images
-    for i in range(1000, 1050):
+    for i in range(0, 1129):
         predicted = np.clip(model.predict(test_gray[i].reshape(1, SIZE, SIZE, 3)), 0.0, 1.0).reshape(SIZE, SIZE, 3)
         save_image_pairs(test_color[i], test_gray[i], predicted, os.path.join(RESULTS_PATH, f'result_{i}.png'))
 

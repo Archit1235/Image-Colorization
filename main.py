@@ -9,7 +9,7 @@ from utils import save_image_pairs
 SIZE = 160
 EPOCHS = 50
 BATCH_SIZE = 64
-LOGS_PATH = './logs'
+LOGS_PATH = './results/logs'
 MODEL_PATH = './models'
 RESULTS_PATH = './results'
 GRAY_IMAGE_PATH = './data/gray'
@@ -66,12 +66,12 @@ def main():
 
     # Load Data
     print("Loading images...")
-    color_images = load_and_preprocess_images(COLOR_IMAGE_PATH, SIZE, stop_filename='6000.jpg', color=True)
-    gray_images = load_and_preprocess_images(GRAY_IMAGE_PATH, SIZE, stop_filename='6000.jpg', color=False)
+    color_images = load_and_preprocess_images(COLOR_IMAGE_PATH, SIZE, color=True)
+    gray_images = load_and_preprocess_images(GRAY_IMAGE_PATH, SIZE, color=False)
 
     # Split Data
-    train_gray, train_color = gray_images[:5500], color_images[:5500]
-    test_gray, test_color = gray_images[5500:], color_images[5500:]
+    train_gray, train_color = gray_images[:6000], color_images[:6000]
+    test_gray, test_color = gray_images[6000:], color_images[6000:]
 
     # Reshape
     train_gray = np.reshape(train_gray, (len(train_gray), SIZE, SIZE, 3))

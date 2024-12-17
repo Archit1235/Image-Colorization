@@ -2,7 +2,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from utils import load_and_preprocess_images, save_image_pairs
+from data_loader import load_and_preprocess_images
+from utils import save_image_pairs
 
 SIZE = 160
 MODEL_PATH = './models/model.keras'

@@ -104,41 +104,33 @@ def plot_ssim_distribution(ssim_values):
     plt.show()
 
 def main():
-    # Create results directory
     os.makedirs(RESULTS_PATH, exist_ok=True)
 
-    # Load Model
     print("Loading model...")
     model = tf.keras.models.load_model(MODEL_PATH)
 
-    # Load Test Data
     print("Loading test data...")
     gray_images, color_images = load_test_data()
 
-    # Evaluate Model
     print("Evaluating model on test data...")
     results = model.evaluate(gray_images, color_images, batch_size=BATCH_SIZE, verbose=1)
     print(f"Test Loss: {results[0]}, Test Accuracy: {results[1]}")
 
-    # Generate Sample Predictions
     print("Generating sample predictions...")
     plot_sample_predictions(model, gray_images, color_images, num_samples=5)
 
-    # Calculate PSNR
     print("Calculating PSNR...")
     predicted_images = np.clip(model.predict(gray_images), 0.0, 1.0)
     psnr_values = calculate_psnr(color_images, predicted_images)
     plot_psnr_distribution(psnr_values)
     print(f"Mean PSNR: {np.mean(psnr_values):.2f} dB")
 
-    # Calculate SSIM
     print("Calculating SSIM...")
     ssim_values = calculate_ssim(color_images, predicted_images)
     plot_ssim_distribution(ssim_values)
     print(f"Mean SSIM: {np.mean(ssim_values):.2f}")
 
-    # Optional: Plot Metric Histories if available
-    history_path = './results/training_history.npy'  # Ensure you save history in training script
+    history_path = './results/training_history.npy'
     if os.path.exists(history_path):
         print("Plotting training and validation metrics...")
         plot_metric_histories(history_path)

@@ -21,13 +21,13 @@ def up(filters, kernel_size, dropout=False):
 def build_model(input_shape):
     """Build the image colorization model."""
     inputs = layers.Input(shape=input_shape)
-    # Downsampling
+
     d1 = down(128, (3, 3), False)(inputs)
     d2 = down(128, (3, 3), False)(d1)
     d3 = down(256, (3, 3), True)(d2)
     d4 = down(512, (3, 3), True)(d3)
     d5 = down(512, (3, 3), True)(d4)
-    # Upsampling
+
     u1 = up(512, (3, 3))(d5)
     u1 = layers.concatenate([u1, d4])
     u2 = up(256, (3, 3))(u1)
